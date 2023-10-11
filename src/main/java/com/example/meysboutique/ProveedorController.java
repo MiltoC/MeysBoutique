@@ -1,6 +1,8 @@
 package com.example.meysboutique;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -67,16 +69,16 @@ public class ProveedorController implements Initializable {
     private Pane pnl_campos;
 
     @FXML
+    private ComboBox<String> txf_direccion_proveedor;
+
+    @FXML
     private TableView<DatosProveedores> tbl_datos_proveedor;
 
     @FXML
-    private TextField txf_codigo_proveedor;
-
-    @FXML
-    private TextField txf_direccion_proveedor;
-
-    @FXML
     private TextField txf_nombre_proveedor;
+
+    @FXML
+    private TextField txf_nombre_encargado;
 
     @FXML
     private TextField txf_telefono_proveedor;
@@ -173,15 +175,13 @@ public class ProveedorController implements Initializable {
 
     @FXML
     void clickAgregar(ActionEvent event) {
-        String codigo = txf_codigo_proveedor.getText();
-        String nombre = txf_nombre_proveedor.getText();
-        String direccion = txf_direccion_proveedor.getText();
+        String nombreProveedor = txf_nombre_proveedor.getText();
+        String nombreEncargado = txf_nombre_encargado.getText();
+        String direccion = txf_direccion_proveedor.getValue();
         String telefono = txf_telefono_proveedor.getText();
 
-        if (codigo.isEmpty() || nombre.isEmpty() || direccion.isEmpty() || telefono.isEmpty()) {
-            // Mostrar un mensaje de error
-            // Puedes usar un Label o un cuadro de diálogo para mostrar el mensaje de error
-            // Por ejemplo:
+        if (nombreProveedor.isEmpty() || nombreEncargado.isEmpty() || direccion == null || telefono.isEmpty()) {
+
             mostrarMensajeError("Error en los campos de texto", "Por favor, complete todos los campos.");
             return;
         } else {
@@ -191,7 +191,7 @@ public class ProveedorController implements Initializable {
             }else{
                 if (estadoGuardado == 1) {
                     // Crear un nuevo objeto Proveedor y agregarlo a la TableView
-                    DatosProveedores proveedor = new DatosProveedores(codigo, nombre, direccion, telefono);
+                    DatosProveedores proveedor = new DatosProveedores(nombreProveedor, nombreEncargado, direccion, telefono);
                     tbl_datos_proveedor.getItems().add(proveedor);
                     mostrarMensajeExito("Datos","Datos Guardados");
                     tbl_datos_proveedor.setDisable(false);
@@ -201,8 +201,8 @@ public class ProveedorController implements Initializable {
                     int nfila = tbl_datos_proveedor.getSelectionModel().getSelectedIndex();
                     if (nfila >= 0) {
                         DatosProveedores proveedor = tbl_datos_proveedor.getItems().get(nfila);
-                        proveedor.setCodigo(codigo);
-                        proveedor.setNombre(nombre);
+                        proveedor.setNombreProveedor(nombreProveedor);
+                        proveedor.setNombreEncargado(nombreEncargado);
                         proveedor.setDireccion(direccion);
                         proveedor.setTelefono(telefono);
                         tbl_datos_proveedor.refresh(); // Actualizar la vista de la tabla
@@ -233,13 +233,14 @@ public class ProveedorController implements Initializable {
 
         // Inicializar las columnas de la TableView
         // Configura las celdas de las columnas para mostrar los datos
-        colCodigo.setCellValueFactory(new PropertyValueFactory<>("codigo"));
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colCodigo.setCellValueFactory(new PropertyValueFactory<>("nombreProveedor"));
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombreEncargado"));
         colDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
 
         // Agrega un oyente para el evento de selección en la tabla
         tbl_datos_proveedor.getSelectionModel().getSelectedItems().addListener((ListChangeListener.Change<? extends DatosProveedores> change) -> {
+
             if (!change.getList().isEmpty()) {
                 // Si hay elementos seleccionados, habilita los botones "Actualizar" y "Eliminar"
                 btn_actualizar.setDisable(false);
@@ -251,35 +252,59 @@ public class ProveedorController implements Initializable {
             }
         });
 
+        ObservableList<String> direcciones = FXCollections.observableArrayList(
+                "Dirección 1",
+                "Dirección 2",
+                "Dirección 3"
+        );
+
+        txf_direccion_proveedor.setItems(direcciones);
+
         // Agrega un oyente para el evento de clic en la tabla
         tbl_datos_proveedor.setOnMouseClicked(event -> {
             DatosProveedores proveedorSeleccionado = tbl_datos_proveedor.getSelectionModel().getSelectedItem();
             if (proveedorSeleccionado != null) {
                 // Establece los datos de la fila seleccionada en los campos de texto
-                txf_codigo_proveedor.setText(proveedorSeleccionado.getCodigo());
-                txf_nombre_proveedor.setText(proveedorSeleccionado.getNombre());
-                txf_direccion_proveedor.setText(proveedorSeleccionado.getDireccion());
+                txf_nombre_proveedor.setText(proveedorSeleccionado.getNombreProveedor());
+                txf_nombre_encargado.setText(proveedorSeleccionado.getNombreEncargado());
+                txf_direccion_proveedor.setValue("Valor deseado");
                 txf_telefono_proveedor.setText(proveedorSeleccionado.getTelefono());
             }
         });
 
-        // Agregar validador para el campo de código
-        txf_codigo_proveedor.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                txf_codigo_proveedor.setText(newValue.replaceAll("[^\\d]", ""));
+        tbl_datos_proveedor.setOnMouseClicked(event -> {
+            DatosProveedores proveedorSeleccionado = tbl_datos_proveedor.getSelectionModel().getSelectedItem();
+            if (proveedorSeleccionado != null) {
+                // Establece los datos de la fila seleccionada en los campos de texto
+                txf_nombre_proveedor.setText(proveedorSeleccionado.getNombreProveedor());
+                txf_nombre_encargado.setText(proveedorSeleccionado.getNombreEncargado());
+
+                // Verifica si la dirección del proveedor está en la lista de direcciones
+                String direccion = proveedorSeleccionado.getDireccion();
+                if (direcciones.contains(direccion)) {
+                    txf_direccion_proveedor.setValue(direccion);
+                } else {
+                    txf_direccion_proveedor.getSelectionModel().clearSelection();
+                }
+
+                txf_telefono_proveedor.setText(proveedorSeleccionado.getTelefono());
             }
         });
 
-        // Agregar validador para los otros campos
+
+        // Agregar validador para el campo nombre del proveedor
         txf_nombre_proveedor.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("^[a-zA-Z]*$ ")) {
+            if (newValue.length() > 100) {
+                txf_nombre_proveedor.setText(oldValue); // Limitar a 100 caracteres
+            } else if (!newValue.matches("^[a-zA-Z\\s]*$")) {
                 txf_nombre_proveedor.setText(newValue.replaceAll("[^a-zA-Z\\s]", ""));
             }
         });
 
-        txf_direccion_proveedor.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("^[a-zA-Z]*$")) {
-                txf_direccion_proveedor.setText(newValue.replaceAll("[^a-zA-Z\\s]", ""));
+        // Agregar validador para los otros campos
+        txf_nombre_encargado.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("^[a-zA-Z]*$ ")) {
+                txf_nombre_encargado.setText(newValue.replaceAll("[^a-zA-Z\\s]", ""));
             }
         });
 
@@ -321,9 +346,9 @@ public class ProveedorController implements Initializable {
     }
 
     private void vaciar() {
-        txf_codigo_proveedor.clear();
         txf_nombre_proveedor.clear();
-        txf_direccion_proveedor.clear();
+        txf_nombre_encargado.clear();
         txf_telefono_proveedor.clear();
+        txf_direccion_proveedor.setValue(null);
     }
 }

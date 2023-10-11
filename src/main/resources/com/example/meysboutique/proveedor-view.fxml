@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
@@ -135,7 +136,7 @@
                 </ImageView>
             <Pane fx:id="pnl_campos" disable="true" layoutX="407.0" layoutY="-1.0" prefHeight="290.0" prefWidth="467.0">
                <children>
-                  <Label layoutX="45.0" layoutY="29.0" text="Codigo proveedor">
+                  <Label layoutX="32.0" layoutY="29.0" text="Nombre proveedor">
                      <font>
                         <Font name="System Italic" size="16.0" />
                      </font>
@@ -145,8 +146,7 @@
                         <Font name="System Italic" size="16.0" />
                      </font>
                   </Label>
-                  <TextField fx:id="txf_codigo_proveedor" layoutX="177.0" layoutY="23.0" prefHeight="37.0" prefWidth="254.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
-                  <TextField fx:id="txf_nombre_proveedor" layoutX="177.0" layoutY="76.0" prefHeight="37.0" prefWidth="254.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
+                  <TextField fx:id="txf_nombre_encargado" layoutX="177.0" layoutY="76.0" prefHeight="37.0" prefWidth="254.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
                   <Label layoutX="105.0" layoutY="139.0" text="Telefono">
                      <font>
                         <Font name="System Italic" size="16.0" />
@@ -158,9 +158,10 @@
                         <Font name="System Italic" size="16.0" />
                      </font>
                   </Label>
-                  <TextField fx:id="txf_direccion_proveedor" layoutX="176.0" layoutY="185.0" prefHeight="37.0" prefWidth="254.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
                   <Button layoutX="220.0" layoutY="239.0" mnemonicParsing="false" onAction="#clickAgregar" prefHeight="37.0" prefWidth="101.0" style="-fx-background-color: #B9F6CA; -fx-background-radius: 20; -fx-border-radius: 20;" text="Agregar" />
                   <Button layoutX="330.0" layoutY="239.0" mnemonicParsing="false" onAction="#ClickBtnCancelar" prefHeight="37.0" prefWidth="101.0" style="-fx-background-color: #EEEEEE; -fx-background-radius: 20; -fx-border-radius: 20;" text="Cancelar" />
+                  <TextField fx:id="txf_nombre_proveedor" layoutX="177.0" layoutY="23.0" prefHeight="37.0" prefWidth="254.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
+                  <ComboBox fx:id="txf_direccion_proveedor" layoutX="177.0" layoutY="185.0" prefHeight="38.0" prefWidth="254.0" promptText="Seleccione su municipio" />
                </children></Pane>
             <Pane fx:id="pnl_botones" layoutY="225.0" prefHeight="67.0" prefWidth="370.0">
                <children>
