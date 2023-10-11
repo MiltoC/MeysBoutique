@@ -54,7 +54,7 @@ public class HelloController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
         Scene scene = new Scene(loader.load());
         Stage stage = new Stage();
-        stage.setTitle("Login-Mey's Boutique");
+        stage.setTitle("Inicio's Boutique");
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
