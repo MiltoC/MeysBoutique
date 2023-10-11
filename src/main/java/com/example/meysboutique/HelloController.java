@@ -65,7 +65,7 @@ public class HelloController {
             Connection connection = DatabaseUtil.getConnection();
             if (connection != null) {
                 mostrarAlerta("Conexión Exitosa", "La conexión a la base de datos se ha establecido correctamente.");
-
+                connection.close();
                 // Realizar aquí las operaciones con la base de datos
             } else {
                 mostrarAlerta("Error de Conexión", "No se pudo establecer la conexión a la base de datos.");

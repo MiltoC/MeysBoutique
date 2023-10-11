@@ -1,5 +1,7 @@
 package com.example.meysboutique;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,8 +13,11 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.EventObject;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ResgistroController {
 
@@ -59,11 +64,29 @@ public class ResgistroController {
         // Establece la fecha inicial en el año 2023 (o el año que desees)
         fechaUsuario.setValue(LocalDate.of(2002, 1, 1));
 
-        // Establece las opciones del ComboBox
-        direccionUsuario.getItems().addAll("Ilobasco", "Cojutepeque", "Sensuntepeque");
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            Statement statement = connection.createStatement();
+            String query = "SELECT nombreMunicipio FROM tablaMunicipio";
+            ResultSet resultSet = statement.executeQuery(query);
 
-        // Establece la opción por defecto
-        direccionUsuario.setValue("Ilobasco");
+            ObservableList<String> municipios = FXCollections.observableArrayList();
+
+            while (resultSet.next()) {
+                municipios.add(resultSet.getString("nombreMunicipio"));
+            }
+
+            direccionUsuario.setItems(municipios);
+
+            // Establece la opción por defecto
+            direccionUsuario.setValue(municipios.get(0));
+
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         primerNombreUsuario.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("^[a-zA-Z]*$")) {
@@ -108,24 +131,52 @@ public class ResgistroController {
         });
     }
 
-    public void btnRegistroAcceder(ActionEvent actionEvent) throws IOException {
+    public void btnRegistroAcceder(ActionEvent actionEvent) throws IOException, SQLException {
 
         if (validarCampos()) {
-            // Las credenciales son correctas, permite el acceso al sistema
-            Stage currentStage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
-            currentStage.close();
+            Connection connection = null;
+            connection = DatabaseUtil.getConnection();
 
-            //muestra mensaje de registro exitoso
-            mostrarMensajeExito("Registro exitoso", "El usuario se ha registrado correctamente.");
+            String selectedMunicipio = direccionUsuario.getValue(); // Obtener el nombre del municipio seleccionado
+            int codigoMunicipio = obtenerCodigoMunicipio(selectedMunicipio);
 
-            //redirecciona a la ventana de login
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("Login-Mey's Boutique");
-            stage.setScene(scene);
-            stage.setResizable(false);
-            stage.show();
+            String sql = "INSERT INTO tablaUsuario (primerNombre, segundoNombre, tercerNombre, primerApellido, segundoApellido, fechaNacimiento, apellidoCasado, telefono, contraseña, correo, codigoMunicipio) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, primerNombreUsuario.getText());
+            preparedStatement.setString(2, segundoNombreUsuario.getText());
+            preparedStatement.setString(3, tercerNombreUsuario.getText());
+            preparedStatement.setString(4, primerApellidoUsuario.getText());
+            preparedStatement.setString(5, segundoApellidoUsuario.getText());
+            preparedStatement.setDate(6, java.sql.Date.valueOf(fechaUsuario.getValue()));
+            preparedStatement.setString(7, apellidoConyugalUsuario.getText());
+            preparedStatement.setString(8, telefonoUsuario.getText());
+            preparedStatement.setString(9, contraseñaUsuario.getText());
+            preparedStatement.setString(10, correoUsuario.getText());
+            preparedStatement.setInt(11, codigoMunicipio);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            if (rowsAffected > 0) {
+                // Las credenciales son correctas, permite el acceso al sistema
+                Stage currentStage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
+                currentStage.close();
+
+                // Muestra mensaje de registro exitoso
+                mostrarMensajeExito("Registro exitoso", "El usuario se ha registrado correctamente.");
+
+                // Redirecciona a la ventana de login
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
+                Scene scene = new Scene(loader.load());
+                Stage stage = new Stage();
+                stage.setTitle("Login-Mey's Boutique");
+                stage.setScene(scene);
+                stage.setResizable(false);
+                stage.show();
+            } else {
+                mostrarMensajeError("Error en el registro", "No se pudo realizar el registro.");
+            }
         }
     }
 
@@ -246,5 +297,24 @@ public class ResgistroController {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    public int obtenerCodigoMunicipio(String nombreMunicipio) throws SQLException {
+        Connection connection = null;
+        connection = DatabaseUtil.getConnection();
+
+        // Consulta SQL para obtener el código del municipio
+        String municipioQuery = "SELECT codigoMunicipio FROM tablaMunicipio WHERE nombreMunicipio = ?";
+        PreparedStatement municipioStatement = connection.prepareStatement(municipioQuery);
+        municipioStatement.setString(1, nombreMunicipio);
+        ResultSet municipioResultSet = municipioStatement.executeQuery();
+
+        int codigoMunicipio = 1; // Valor por defecto en caso de que no se encuentre el municipio
+
+        if (municipioResultSet.next()) {
+            codigoMunicipio = municipioResultSet.getInt("codigoMunicipio");
+        }
+
+        return codigoMunicipio;
     }
 }

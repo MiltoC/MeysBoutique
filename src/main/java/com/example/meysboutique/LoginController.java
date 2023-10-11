@@ -13,6 +13,10 @@ import javafx.scene.control.PasswordField;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
@@ -33,30 +37,53 @@ public class LoginController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         usuario.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("^[a-zA-Z]*$")) {
-                usuario.setText(newValue.replaceAll("[^a-zA-Z\\s]", ""));
+                usuario.setText(newValue.replaceAll("[^a-zA-Z@.\\s]", ""));
             }
         });
     }
 
-    public void btnAcceder(ActionEvent actionEvent) throws IOException {
+    public void btnAcceder(ActionEvent actionEvent) throws IOException, SQLException {
         String usuarioIngresado = usuario.getText();
         String contraseñaIngresada = contraseña.getText();
 
-        if (usuarioIngresado.equals(usuarioCorrecto) && contraseñaIngresada.equals(contraseñaCorrecta)) {
-            // Las credenciales son correctas, permite el acceso al sistema
-            Stage currentStage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
-            currentStage.close();
+        // Conectar a la base de datos
+        Connection connection = DatabaseUtil.getConnection();
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("inicio-view.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("Inicio-Mey's Boutique");
-            stage.setScene(scene);
-            stage.setResizable(false);
-            stage.show();
-        } else {
-            // Las credenciales son incorrectas, muestra un mensaje de error
-            mostrarMensajeError("Credenciales incorrectas", "El nombre de usuario o la contraseña son incorrectos.");
+        try {
+            // Consulta SQL para verificar las credenciales
+            String sql = "SELECT * FROM tablaUsuario WHERE correo = ? AND contraseña = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, usuarioIngresado);
+            preparedStatement.setString(2, contraseñaIngresada);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                // Las credenciales son correctas, permite el acceso al sistema
+                Stage currentStage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
+                currentStage.close();
+
+                mostrarMensajeExito("Inicio de sesión exitoso", "Bienvenido!");
+
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("inicio-view.fxml"));
+                Scene scene = new Scene(loader.load());
+                Stage stage = new Stage();
+                stage.setTitle("Inicio-Mey's Boutique");
+                stage.setScene(scene);
+                stage.setResizable(false);
+                stage.show();
+            } else {
+                // Las credenciales son incorrectas, muestra un mensaje de error
+                mostrarMensajeError("Credenciales incorrectas", "El nombre de usuario o la contraseña son incorrectos.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mostrarMensajeError("Error en la base de datos", "No se pudo verificar las credenciales.");
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -75,6 +102,14 @@ public class LoginController implements Initializable {
 
     private void mostrarMensajeError(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
+
+    private void mostrarMensajeExito(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
