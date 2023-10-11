@@ -4,9 +4,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import javafx.fxml.Initializable;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -35,6 +35,85 @@ public class ClienteController implements Initializable {
 
     @FXML
     private Button btnUsuarios;
+
+    @FXML
+    private Button btn_New;
+
+    @FXML
+    private Button btn_actualizar;
+
+    @FXML
+    private Button btn_eliminar;
+
+    @FXML
+    private TableColumn<?, ?> colApellido;
+
+    @FXML
+    private TableColumn<?, ?> colCodigo;
+
+    @FXML
+    private TableColumn<?, ?> colDireccion;
+
+    @FXML
+    private TableColumn<?, ?> colDui;
+
+    @FXML
+    private TableColumn<?, ?> colNombre;
+
+    @FXML
+    private TableColumn<?, ?> colTelefono;
+
+    @FXML
+    private Pane pnl_botones;
+
+    @FXML
+    private Pane pnl_campos;
+
+    @FXML
+    private TableView<?> tbl_datos_clientes;
+
+    @FXML
+    private TextField txf_apellido_cliente;
+
+    @FXML
+    private TextField txf_codigo_cliente;
+
+    @FXML
+    private TextField txf_direccion_cliente;
+
+    @FXML
+    private TextField txf_dui_cliente;
+
+    @FXML
+    private TextField txf_nombre_cliente;
+
+    @FXML
+    private TextField txf_telefono_cliente;
+
+    @FXML
+    void ClickBtnCancelar(ActionEvent event) {
+
+    }
+
+    @FXML
+    void ClickBtnDelete(ActionEvent event) {
+
+    }
+
+    @FXML
+    void ClickBtnNew(ActionEvent event) {
+
+    }
+
+    @FXML
+    void ClickBtnUpdate(ActionEvent event) {
+
+    }
+
+    @FXML
+    void clickAgregar(ActionEvent event) {
+
+    }
 
 
     @Override

@@ -106,7 +106,7 @@
       </Pane>
       <Pane layoutX="306.0" layoutY="468.0" prefHeight="190.0" prefWidth="409.0" style="-fx-background-color: #b8c1ec; -fx-border-radius: 10px; -fx-background-radius: 10px;">
          <children>
-            <Button fx:id="btnProductos" alignment="BASELINE_LEFT" mnemonicParsing="false" prefHeight="190.0" prefWidth="409.0" style="-fx-background-color: transparent;" text="Productos">
+            <Button fx:id="btnProductos" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#productosOpen" prefHeight="190.0" prefWidth="409.0" style="-fx-background-color: transparent;" text="Productos">
                <padding>
                   <Insets left="20.0" />
                </padding>
@@ -140,7 +140,7 @@
       </Pane>
       <Pane layoutX="754.0" layoutY="468.0" prefHeight="190.0" prefWidth="409.0" style="-fx-background-color: #b8c1ec; -fx-border-radius: 10px; -fx-background-radius: 10px;">
          <children>
-            <Button fx:id="btnVentas" alignment="BASELINE_LEFT" mnemonicParsing="false" prefHeight="190.0" prefWidth="409.0" style="-fx-background-color: transparent;" text="Ventas">
+            <Button fx:id="btnVentas" alignment="BASELINE_LEFT" mnemonicParsing="false" onAction="#ventasOpen" prefHeight="190.0" prefWidth="409.0" style="-fx-background-color: transparent;" text="Ventas">
                <padding>
                   <Insets left="20.0" />
                </padding>

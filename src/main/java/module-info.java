@@ -1,6 +1,7 @@
 module com.example.meysboutique {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.sql;
 
 
     opens com.example.meysboutique to javafx.fxml;
