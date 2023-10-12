@@ -191,7 +191,7 @@
                 <TableColumn fx:id="colCategoria_producto" prefWidth="75.0" style="-fx-alignment: center;" text="Categoria" />
                 <TableColumn fx:id="colPrecio_producto" prefWidth="75.0" style="-fx-alignment: center;" text="Precio" />
                 <TableColumn fx:id="colDescripcion_producto" prefWidth="75.0" style="-fx-alignment: center;" text="Descripción" />
-            <TableColumn fx:id="colStok_producto" prefWidth="75.0" style="-fx-alignment: cennter;" text="Stock" />
+            <TableColumn fx:id="colStok_producto" prefWidth="75.0" text="Stock" />
             </columns>
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
