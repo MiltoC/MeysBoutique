@@ -288,13 +288,6 @@ public class ClienteController implements Initializable {
             e.printStackTrace();
         }
 
-        asignarEventosHover(btnBoutiques);
-        asignarEventosHover(btnUsuarios);
-        asignarEventosHover(btnCargos);
-        asignarEventosHover(btnCerrar);
-        asignarEventosHover(btnMenu);
-        asignarEventosHover(btnClientes);
-
         // Configura las columnas para mostrar los datos de los clientes
         colCodigo.setCellValueFactory(new PropertyValueFactory<>("codigoCliente"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombreCliente"));
@@ -471,6 +464,7 @@ public class ClienteController implements Initializable {
             connection.close();
         } catch (Exception e) {
             e.printStackTrace();
+            mostrarMensajeError("Error en la base de datos", "No se pudieron cargar los datos desde la base de datos.");
         }
     }
 

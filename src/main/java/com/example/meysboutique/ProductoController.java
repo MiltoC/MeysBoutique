@@ -88,6 +88,9 @@ public class ProductoController implements Initializable {
     private Pane pnl_campos;
 
     @FXML
+    private Pane panel_agregar;
+
+    @FXML
     private TableView<DatosProductos> tbl_datos_productos;
 
     @FXML
@@ -114,8 +117,7 @@ public class ProductoController implements Initializable {
 
         tbl_datos_productos.setDisable(false);
         pnl_campos.setDisable(true);
-        pnl_botones.setDisable(true);
-
+        panel_agregar.setDisable(true);
     }
 
     @FXML
@@ -166,7 +168,7 @@ public class ProductoController implements Initializable {
 
     @FXML
     void ClickBtnNew(ActionEvent event) {
-        pnl_botones.setDisable(false);
+        panel_agregar.setDisable(false);
         pnl_campos.setDisable(false);
         btn_eliminar.setDisable(true);
         btn_actualizar.setDisable(true);
@@ -263,7 +265,7 @@ public class ProductoController implements Initializable {
 
                 cargarDatosProductos();
 
-                pnl_botones.setDisable(false);
+                panel_agregar.setDisable(true);
                 pnl_campos.setDisable(true);
                 tbl_datos_productos.getSelectionModel().clearSelection();
                 tbl_datos_productos.setDisable(false);
@@ -509,8 +511,8 @@ public class ProductoController implements Initializable {
                 this.productoSeleccionado = productoSeleccionado.getCodigoProducto();
 
                 pnl_campos.setDisable(false);
-                btn_actualizar.setDisable(true);
-                btn_eliminar.setDisable(true);
+                btn_actualizar.setDisable(false);
+                btn_eliminar.setDisable(false);
             }
         });
 
