@@ -298,7 +298,7 @@ public class ProveedorController implements Initializable {
             e.printStackTrace();
         }
 
-        // Agrega un oyente para el evento de clic en la tabla
+        // Agrega un oyente para el evento de clic en la tabl
         tbl_datos_proveedor.setOnMouseClicked(event -> {
             DatosProveedores proveedorSeleccionado = tbl_datos_proveedor.getSelectionModel().getSelectedItem();
             if (proveedorSeleccionado != null) {
