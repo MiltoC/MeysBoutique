@@ -15,8 +15,11 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.*;
 import java.util.Optional;
 import java.util.ResourceBundle;
+
+import static com.example.meysboutique.DatabaseUtil.getConnection;
 
 public class ProveedorController implements Initializable {
 
@@ -104,15 +107,17 @@ public class ProveedorController implements Initializable {
             int nfila = tbl_datos_proveedor.getSelectionModel().getSelectedIndex();
 
             if (nfila >= 0) {
-                tbl_datos_proveedor.getItems().remove(nfila);
-                mostrarMensajeExito("Eliminar registro","Fila Eliminada");
-                tbl_datos_proveedor.getSelectionModel().clearSelection();//para que se deseleccione el siguiente elemento de la tabla
+                DatosProveedores proveedor = tbl_datos_proveedor.getItems().get(nfila);
+                eliminarProveedorDeBaseDeDatos(proveedor); // Elimina de la base de datos
+                tbl_datos_proveedor.getItems().remove(nfila); // Elimina de la TableView
                 vaciar();
             } else {
                 mostrarMensajeExito("Seleccione una fila","No se ha seleccionado ninguna fila para eliminar.");
                 tbl_datos_proveedor.getSelectionModel().clearSelection();//para que se deseleccione el siguiente elemento de la tabla
             }
         }
+
+        tbl_datos_proveedor.getSelectionModel().clearSelection();
     }
 
     @FXML
@@ -136,7 +141,6 @@ public class ProveedorController implements Initializable {
             tbl_datos_proveedor.setDisable(true);
         }
     }
-
 
     @FXML
     void menuInicioOpen(ActionEvent event) throws IOException {
@@ -180,6 +184,8 @@ public class ProveedorController implements Initializable {
         String direccion = txf_direccion_proveedor.getValue();
         String telefono = txf_telefono_proveedor.getText();
 
+
+
         if (nombreProveedor.isEmpty() || nombreEncargado.isEmpty() || direccion == null || telefono.isEmpty()) {
 
             mostrarMensajeError("Error en los campos de texto", "Por favor, complete todos los campos.");
@@ -191,8 +197,16 @@ public class ProveedorController implements Initializable {
             }else{
                 if (estadoGuardado == 1) {
                     // Crear un nuevo objeto Proveedor y agregarlo a la TableView
-                    DatosProveedores proveedor = new DatosProveedores(nombreProveedor, nombreEncargado, direccion, telefono);
+                    DatosProveedores proveedor = new DatosProveedores(0, nombreProveedor, nombreEncargado, direccion, telefono);
                     tbl_datos_proveedor.getItems().add(proveedor);
+
+                    // Insertar datos en la base de datos
+                    insertarProveedorEnBaseDeDatos(proveedor);
+
+                    // Actualizar el objeto en la TableView con el código generado
+                    proveedor.setCodigoProveedor(obtenerCodigoProveedorDesdeBaseDeDatos()); // Reemplaza esto con el método real para obtener el código
+                    tbl_datos_proveedor.refresh(); // Actualizar la vista de la tabla
+
                     mostrarMensajeExito("Datos","Datos Guardados");
                     tbl_datos_proveedor.setDisable(false);
                     tbl_datos_proveedor.getSelectionModel().clearSelection();//para que se deseleccione el siguiente elemento de la tabla
@@ -206,6 +220,10 @@ public class ProveedorController implements Initializable {
                         proveedor.setDireccion(direccion);
                         proveedor.setTelefono(telefono);
                         tbl_datos_proveedor.refresh(); // Actualizar la vista de la tabla
+
+                        // Actualizar datos en la base de datos
+                        actualizarProveedorEnBaseDeDatos(proveedor);
+
                         mostrarMensajeExito("Datos","Datos Actualizados");
                         tbl_datos_proveedor.getSelectionModel().clearSelection();//para que se deseleccione el siguiente elemento de la tabla
                         tbl_datos_proveedor.setDisable(false);
@@ -213,6 +231,7 @@ public class ProveedorController implements Initializable {
                         mostrarMensajeExito("Seleccionar fila","No se ha seleccionado ninguna fila para actualizar.");
                     }
                 }
+                cargarDatosDesdeBaseDeDatos();
             }
 
             // Limpia los campos TextField después de agregar o actualizar los datos
@@ -224,6 +243,9 @@ public class ProveedorController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        cargarDatosDesdeBaseDeDatos();
+
         asignarEventosHover(btnBoutiques);
         asignarEventosHover(btnUsuarios);
         asignarEventosHover(btnCargos);
@@ -252,13 +274,29 @@ public class ProveedorController implements Initializable {
             }
         });
 
-        ObservableList<String> direcciones = FXCollections.observableArrayList(
-                "Dirección 1",
-                "Dirección 2",
-                "Dirección 3"
-        );
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            Statement statement = connection.createStatement();
+            String query = "SELECT nombreMunicipio FROM tablaMunicipio";
+            ResultSet resultSet = statement.executeQuery(query);
 
-        txf_direccion_proveedor.setItems(direcciones);
+            ObservableList<String> municipios = FXCollections.observableArrayList();
+
+            while (resultSet.next()) {
+                municipios.add(resultSet.getString("nombreMunicipio"));
+            }
+
+            txf_direccion_proveedor.setItems(municipios);
+
+            // Establece la opción por defecto
+            txf_direccion_proveedor.setValue(municipios.get(0));
+
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Agrega un oyente para el evento de clic en la tabla
         tbl_datos_proveedor.setOnMouseClicked(event -> {
@@ -281,11 +319,8 @@ public class ProveedorController implements Initializable {
 
                 // Verifica si la dirección del proveedor está en la lista de direcciones
                 String direccion = proveedorSeleccionado.getDireccion();
-                if (direcciones.contains(direccion)) {
-                    txf_direccion_proveedor.setValue(direccion);
-                } else {
-                    txf_direccion_proveedor.getSelectionModel().clearSelection();
-                }
+
+                txf_direccion_proveedor.setValue(direccion);
 
                 txf_telefono_proveedor.setText(proveedorSeleccionado.getTelefono());
             }
@@ -351,4 +386,129 @@ public class ProveedorController implements Initializable {
         txf_telefono_proveedor.clear();
         txf_direccion_proveedor.setValue(null);
     }
+
+    private void insertarProveedorEnBaseDeDatos(DatosProveedores proveedor) {
+        try (Connection con = getConnection()) {
+
+
+            String selectedMunicipio = txf_direccion_proveedor.getValue(); // Obtener el nombre del municipio seleccionado
+            int codigoMunicipio = obtenerCodigoMunicipio(selectedMunicipio);
+
+            String insertSQL = "INSERT INTO tablaProveedor (nombreProveedor, nombreEncargado, telefono, codigoMunicipio) VALUES (?, ?, ?, ?)";
+            PreparedStatement stmt = con.prepareStatement(insertSQL);
+            stmt.setString(1, proveedor.getNombreProveedor());
+            stmt.setString(2, proveedor.getNombreEncargado());
+            stmt.setString(3, proveedor.getTelefono());
+            stmt.setInt(4, codigoMunicipio);
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mostrarMensajeError("Error en la base de datos", "No se pudieron insertar los datos en la base de datos.");
+        }
+    }
+
+
+    private void actualizarProveedorEnBaseDeDatos(DatosProveedores proveedor) {
+
+        try (Connection con = getConnection()) {
+
+            String selectedMunicipio = txf_direccion_proveedor.getValue();
+            int nuevoCodigoMunicipio = obtenerCodigoMunicipio(selectedMunicipio);
+
+            String updateSQL = "UPDATE tablaProveedor SET nombreProveedor = ?, nombreEncargado = ?, telefono = ?, codigoMunicipio = ? WHERE codigoProveedor = ?";
+            PreparedStatement stmt = con.prepareStatement(updateSQL);
+            stmt.setString(1, proveedor.getNombreProveedor());
+            stmt.setString(2, proveedor.getNombreEncargado());
+            stmt.setString(3, proveedor.getTelefono());
+            stmt.setInt(4, nuevoCodigoMunicipio);
+            stmt.setInt(5, proveedor.getCodigoProveedor()); // Agrega el código del proveedor que se está actualizando
+
+
+            cargarDatosDesdeBaseDeDatos();
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mostrarMensajeError("Error en la base de datos", "No se pudieron actualizar los datos en la base de datos.");
+        }
+    }
+
+    public int obtenerCodigoMunicipio(String nombreMunicipio) throws SQLException {
+        Connection connection = null;
+        connection = DatabaseUtil.getConnection();
+
+        // Consulta SQL para obtener el código del municipio
+        String municipioQuery = "SELECT codigoMunicipio FROM tablaMunicipio WHERE nombreMunicipio = ?";
+        PreparedStatement municipioStatement = connection.prepareStatement(municipioQuery);
+        municipioStatement.setString(1, nombreMunicipio);
+        ResultSet municipioResultSet = municipioStatement.executeQuery();
+
+        int codigoMunicipio = 1; // Valor por defecto en caso de que no se encuentre el municipio
+
+        if (municipioResultSet.next()) {
+            codigoMunicipio = municipioResultSet.getInt("codigoMunicipio");
+        }
+
+        return codigoMunicipio;
+    }
+
+
+
+    private void cargarDatosDesdeBaseDeDatos() {
+        try (Connection con = getConnection()) {
+            // Consulta SQL para obtener los datos de proveedores con el nombre del municipio
+            String selectSQL = "SELECT P.codigoProveedor, P.nombreProveedor, P.nombreEncargado, M.nombreMunicipio, P.telefono " +
+                    "FROM tablaProveedor AS P " +
+                    "INNER JOIN tablaMunicipio AS M ON P.codigoMunicipio = M.codigoMunicipio";
+            PreparedStatement stmt = con.prepareStatement(selectSQL);
+            ResultSet resultSet = stmt.executeQuery();
+
+            // Limpiar los datos actuales de la TableView
+            tbl_datos_proveedor.getItems().clear();
+
+            // Llenar la TableView con los datos recuperados
+            while (resultSet.next()) {
+                int codigoProveedor = resultSet.getInt("codigoProveedor");
+                String nombreProveedor = resultSet.getString("nombreProveedor");
+                String nombreEncargado = resultSet.getString("nombreEncargado");
+                String nombreMunicipio = resultSet.getString("nombreMunicipio");
+                String telefono = resultSet.getString("telefono");
+
+                DatosProveedores proveedor = new DatosProveedores(codigoProveedor, nombreProveedor, nombreEncargado, nombreMunicipio, telefono);
+                tbl_datos_proveedor.getItems().add(proveedor);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mostrarMensajeError("Error en la base de datos", "No se pudieron cargar los datos desde la base de datos.");
+        }
+    }
+
+    private void eliminarProveedorDeBaseDeDatos(DatosProveedores proveedor) {
+        try (Connection con = getConnection()) {
+            String deleteSQL = "DELETE FROM tablaProveedor WHERE codigoProveedor = ?";
+            PreparedStatement stmt = con.prepareStatement(deleteSQL);
+
+            stmt.setInt(1, proveedor.getCodigoProveedor()); // Asigna el valor del parámetro ? aquí
+            System.out.println("SQL Query: " + stmt.toString());
+            int filasAfectadas = stmt.executeUpdate();
+
+            if (filasAfectadas > 0) {
+                mostrarMensajeExito("Eliminar registro", "Registro eliminado con éxito.");
+            } else {
+                mostrarMensajeError("Eliminar registro", "No se pudo eliminar el registro.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mostrarMensajeError("Error en la base de datos", "No se pudo eliminar el registro de la base de datos.");
+        }
+    }
+
+    private int obtenerCodigoProveedorDesdeBaseDeDatos() {
+        int codigoProveedor = 0; // Reemplaza esto con la lógica para obtener el código del proveedor
+        // Consulta tu base de datos y obtén el código del nuevo proveedor insertado
+        return codigoProveedor;
+    }
+
+
 }

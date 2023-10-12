@@ -1,16 +1,26 @@
 package com.example.meysboutique;
 
 public class DatosProveedores {
+    private int codigoProveedor;
     private String nombreproveedor;
     private String nombreencargado;
     private String direccion;
     private String telefono;
 
-    public DatosProveedores(String nombreproveedor, String nombreencargado, String direccion, String telefono) {
+    public DatosProveedores(int codigoProveedor, String nombreproveedor, String nombreencargado, String direccion, String telefono) {
+        this.codigoProveedor = codigoProveedor;
         this.nombreproveedor = nombreproveedor;
         this.nombreencargado = nombreencargado;
         this.direccion = direccion;
         this.telefono = telefono;
+    }
+
+    public int getCodigoProveedor() {
+        return codigoProveedor;
+    }
+
+    public void setCodigoProveedor(int codigoProveedor) {
+        this.codigoProveedor = codigoProveedor;
     }
 
     public String getNombreProveedor() {
