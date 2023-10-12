@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
@@ -133,46 +134,38 @@
                         <Image url="@img/userIcon.gif" />
                     </image>
                 </ImageView>
-                <Pane fx:id="pnl_campos" layoutX="407.0" layoutY="1.0" prefHeight="290.0" prefWidth="467.0">
+                <Pane fx:id="pnl_campos" disable="true" layoutX="407.0" layoutY="1.0" prefHeight="224.0" prefWidth="467.0">
                     <children>
-                        <Label layoutX="42.0" layoutY="38.0" text="Codigo">
+                        <Label layoutX="38.0" layoutY="68.0" text="Nombre">
                             <font>
                                 <Font name="System Italic" size="16.0" />
                             </font>
                         </Label>
-                        <Label layoutX="38.0" layoutY="87.0" text="Nombre">
+                        <TextField fx:id="txf_nombre_cliente" layoutX="111.0" layoutY="62.0" prefHeight="37.0" prefWidth="124.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
+                        <Label layoutX="37.0" layoutY="116.0" text="Telefono">
                             <font>
                                 <Font name="System Italic" size="16.0" />
                             </font>
                         </Label>
-                        <TextField fx:id="txf_codigo_cliente" layoutX="111.0" layoutY="32.0" prefHeight="37.0" prefWidth="331.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
-                        <TextField fx:id="txf_nombre_cliente" layoutX="111.0" layoutY="81.0" prefHeight="37.0" prefWidth="124.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
-                        <Label layoutX="37.0" layoutY="135.0" text="Telefono">
+                        <TextField fx:id="txf_dui_cliente" layoutX="317.0" layoutY="110.0" prefHeight="37.0" prefWidth="124.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
+                        <Label layoutX="26.0" layoutY="166.0" text="Direccción">
                             <font>
                                 <Font name="System Italic" size="16.0" />
                             </font>
                         </Label>
-                        <TextField fx:id="txf_dui_cliente" layoutX="317.0" layoutY="129.0" prefHeight="37.0" prefWidth="124.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
-                        <Label layoutX="26.0" layoutY="185.0" text="Direccción">
-                            <font>
-                                <Font name="System Italic" size="16.0" />
-                            </font>
-                        </Label>
-                        <TextField fx:id="txf_direccion_cliente" layoutX="111.0" layoutY="179.0" prefHeight="37.0" prefWidth="331.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
-                        <Button layoutX="220.0" layoutY="239.0" mnemonicParsing="false" onAction="#clickAgregar" prefHeight="37.0" prefWidth="101.0" style="-fx-background-color: #B9F6CA; -fx-background-radius: 20; -fx-border-radius: 20;" text="Agregar" />
-                        <Button layoutX="330.0" layoutY="239.0" mnemonicParsing="false" onAction="#ClickBtnCancelar" prefHeight="37.0" prefWidth="101.0" style="-fx-background-color: #EEEEEE; -fx-background-radius: 20; -fx-border-radius: 20;" text="Cancelar" />
-                  <TextField fx:id="txf_apellido_cliente" layoutX="317.0" layoutY="81.0" prefHeight="37.0" prefWidth="124.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
-                  <Label layoutX="243.0" layoutY="87.0" text="Apellido">
+                  <TextField fx:id="txf_apellido_cliente" layoutX="317.0" layoutY="62.0" prefHeight="37.0" prefWidth="124.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
+                  <Label layoutX="243.0" layoutY="68.0" text="Apellido">
                      <font>
                         <Font name="System Italic" size="16.0" />
                      </font>
                   </Label>
-                  <TextField fx:id="txf_telefono_cliente" layoutX="111.0" layoutY="129.0" prefHeight="37.0" prefWidth="124.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
-                  <Label layoutX="269.0" layoutY="135.0" text="DUI">
+                  <TextField fx:id="txf_telefono_cliente" layoutX="111.0" layoutY="110.0" prefHeight="37.0" prefWidth="124.0" style="-fx-background-radius: 10; -fx-border-radius: 10;" />
+                  <Label layoutX="269.0" layoutY="116.0" text="DUI">
                      <font>
                         <Font name="System Italic" size="16.0" />
                      </font>
                   </Label>
+                  <ComboBox fx:id="direccionCliente" layoutX="113.0" layoutY="160.0" prefHeight="37.0" prefWidth="328.0" />
                     </children></Pane>
                 <Pane fx:id="pnl_botones" layoutY="225.0" prefHeight="67.0" prefWidth="370.0">
                     <children>
@@ -182,6 +175,12 @@
                     </children>
                 </Pane>
                 <Separator layoutX="380.0" layoutY="58.0" orientation="VERTICAL" prefHeight="176.0" prefWidth="4.0" />
+            <Pane fx:id="panel_agregar" disable="true" layoutX="532.0" layoutY="228.0" prefHeight="56.0" prefWidth="328.0">
+               <children>
+                        <Button layoutX="103.0" layoutY="10.0" mnemonicParsing="false" onAction="#clickAgregar" prefHeight="37.0" prefWidth="101.0" style="-fx-background-color: #B9F6CA; -fx-background-radius: 20; -fx-border-radius: 20;" text="Agregar" />
+                        <Button layoutX="213.0" layoutY="10.0" mnemonicParsing="false" onAction="#ClickBtnCancelar" prefHeight="37.0" prefWidth="101.0" style="-fx-background-color: #EEEEEE; -fx-background-radius: 20; -fx-border-radius: 20;" text="Cancelar" />
+               </children>
+            </Pane>
             </children>
         </Pane>
         <TableView fx:id="tbl_datos_clientes" layoutX="295.0" layoutY="491.0" prefHeight="224.0" prefWidth="874.0" style="-fx-border-radius: 0 0 10 10; -fx-background-radius: 0 0 10 10;">
