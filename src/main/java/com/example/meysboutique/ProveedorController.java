@@ -353,7 +353,6 @@ public class ProveedorController implements Initializable {
         });
     }
 
-
     private void asignarEventosHover(Button boton) {
         boton.setOnMouseEntered(event -> {
             boton.setStyle("-fx-background-color: rgb(238, 187, 195, 0.4); -fx-text-fill: white;");
