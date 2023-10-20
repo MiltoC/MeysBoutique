@@ -126,7 +126,7 @@ public class VentaController implements Initializable {
         currentStage.close();
 
         //muestra mensaje de registro exitoso
-        mostrarMensajeExito("Cerrar sesión", "Sesión cerrada exitosamente.");
+        mostrarMensajeExito("Cerrar sesión", "Sesión cerrada .");
 
         //redirecciona a la ventana de login
         FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
