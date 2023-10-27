@@ -56,6 +56,20 @@ public class InicioController implements Initializable {
     }
 
     @FXML
+    void usuariosOpen(ActionEvent event) throws IOException {
+        Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        currentStage.close();
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("usuarios-view.fxml"));
+        Scene scene = new Scene(loader.load());
+        Stage stage = new Stage();
+        stage.setTitle("Usuarios-Mey's Boutique");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    @FXML
     void cerrarSesion(ActionEvent event) throws IOException {
         Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         currentStage.close();

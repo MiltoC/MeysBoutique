@@ -14,7 +14,7 @@
    <children>
       <Pane layoutY="118.0" prefHeight="634.0" prefWidth="254.0" style="-fx-background-color: #232946; -fx-background-radius: 0 10 0 0;" AnchorPane.bottomAnchor="0.0">
          <children>
-            <Button fx:id="hola" alignment="BASELINE_LEFT" layoutY="14.0" mnemonicParsing="false" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Usuarios" textFill="WHITE">
+            <Button fx:id="hola" alignment="BASELINE_LEFT" layoutY="14.0" mnemonicParsing="false" onAction="#usuariosOpen" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Usuarios" textFill="WHITE">
                <padding>
                   <Insets left="100.0" />
                </padding>
