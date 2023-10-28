@@ -1,16 +1,23 @@
 package com.example.meysboutique;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class VentaController implements Initializable {
@@ -46,37 +53,40 @@ public class VentaController implements Initializable {
     private Button btn_eliminar;
 
     @FXML
-    private ComboBox<?> cb_codigo_empleado;
+    private ComboBox<String> cb_codigo_empleado;
 
     @FXML
-    private ComboBox<?> cb_nombre_cliente;
+    private ComboBox<String> cb_nombre_cliente;
 
     @FXML
-    private ComboBox<?> cb_producto_venta;
+    private ComboBox<String> cb_producto_venta;
 
     @FXML
-    private ComboBox<?> cb_transacción_venta;
+    private ComboBox<String> cb_transacción_venta;
 
     @FXML
-    private TableColumn<?, ?> colCodigo_producto;
+    private TableColumn<DatosVentas, Integer> colCantidadProducto;
 
     @FXML
-    private TableColumn<?, ?> col_cliente_venta;
+    private TableColumn<DatosVentas, Integer> colCodigoVenta;
 
     @FXML
-    private TableColumn<?, ?> col_empleado_venta;
+    private TableColumn<DatosVentas, Date> colFechaVenta;
 
     @FXML
-    private TableColumn<?, ?> col_fecha_venta;
+    private TableColumn<DatosVentas, String> colNombreCliente;
 
     @FXML
-    private TableColumn<?, ?> col_producto_venta;
+    private TableColumn<DatosVentas, String> colNombreProducto;
 
     @FXML
-    private TableColumn<?, ?> col_total_venta;
+    private TableColumn<DatosVentas, String> colNombreTransaccion;
 
     @FXML
-    private TableColumn<?, ?> col_transaccion_venta;
+    private TableColumn<DatosVentas, String> colNombreUsuario;
+
+    @FXML
+    private TableColumn<DatosVentas, BigDecimal> colTotalVenta;
 
     @FXML
     private Pane pnl_botones;
@@ -85,10 +95,14 @@ public class VentaController implements Initializable {
     private Pane pnl_campos;
 
     @FXML
-    private TableView<?> tbl_datos_productos;
+    private TableView<DatosVentas> tbl_datos_ventas;
+
+    private ObservableList<DatosVentas> ventaData = FXCollections.observableArrayList();
 
     @FXML
-    private TextField txf_codigo_venta;
+    private TextField txf_cantidad_venta;
+
+    private int ventaSeleccionada;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -98,6 +112,166 @@ public class VentaController implements Initializable {
         asignarEventosHover(btnCerrar);
         asignarEventosHover(btnMenu);
         asignarEventosHover(btnClientes);
+
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            Statement statement = connection.createStatement();
+            String query = "SELECT tipoTransaccion FROM tablaTransaccion";
+            ResultSet resultSet = statement.executeQuery(query);
+
+            ObservableList<String> transaccion = FXCollections.observableArrayList();
+
+            while (resultSet.next()) {
+                transaccion.add(resultSet.getString("tipoTransaccion"));
+            }
+
+            cb_transacción_venta.setItems(transaccion);
+
+            // Establece la opción por defecto
+            cb_transacción_venta.setValue(transaccion.get(0));
+
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            Statement statement = connection.createStatement();
+            String query = "SELECT nombreProducto FROM tablaProducto";
+            ResultSet resultSet = statement.executeQuery(query);
+
+            ObservableList<String> productos = FXCollections.observableArrayList();
+
+            while (resultSet.next()) {
+                productos.add(resultSet.getString("nombreProducto"));
+            }
+
+            // Verifica si la lista de productos está vacía
+            if (!productos.isEmpty()) {
+                // Si hay datos en la lista, establece la opción por defecto
+                cb_producto_venta.setItems(productos);
+                cb_producto_venta.setValue(productos.get(0));
+            } else {
+                // Si la lista está vacía, muestra un valor por defecto
+                cb_producto_venta.setItems(FXCollections.observableArrayList("No hay registros"));
+                cb_producto_venta.setValue("No hay registros");
+            }
+
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            Statement statement = connection.createStatement();
+            String query = "SELECT primerNombre FROM tablaUsuario";
+            ResultSet resultSet = statement.executeQuery(query);
+
+            ObservableList<String> empleado = FXCollections.observableArrayList();
+
+            while (resultSet.next()) {
+                empleado.add(resultSet.getString("primerNombre"));
+            }
+
+            // Verifica si la lista de productos está vacía
+            if (!empleado.isEmpty()) {
+                // Si hay datos en la lista, establece la opción por defecto
+                cb_codigo_empleado.setItems(empleado);
+                cb_codigo_empleado.setValue(empleado.get(0));
+            } else {
+                // Si la lista está vacía, muestra un valor por defecto
+                cb_codigo_empleado.setItems(FXCollections.observableArrayList("No hay registros"));
+                cb_codigo_empleado.setValue("No hay registros");
+            }
+
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            Statement statement = connection.createStatement();
+            String query = "SELECT nombreCliente FROM tablaCliente";
+            ResultSet resultSet = statement.executeQuery(query);
+
+            ObservableList<String> cliente = FXCollections.observableArrayList();
+
+            while (resultSet.next()) {
+                cliente.add(resultSet.getString("nombreCliente"));
+            }
+
+            // Verifica si la lista de productos está vacía
+            if (!cliente.isEmpty()) {
+                // Si hay datos en la lista, establece la opción por defecto
+                cb_nombre_cliente.setItems(cliente);
+                cb_nombre_cliente.setValue(cliente.get(0));
+            } else {
+                // Si la lista está vacía, muestra un valor por defecto
+                cb_nombre_cliente.setItems(FXCollections.observableArrayList("No hay registros"));
+                cb_nombre_cliente.setValue("No hay registros");
+            }
+
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Configura las columnas para mostrar los datos de las ventas
+        colCodigoVenta.setCellValueFactory(new PropertyValueFactory<>("codigoVenta"));
+        colFechaVenta.setCellValueFactory(new PropertyValueFactory<>("fechaVenta"));
+        colNombreCliente.setCellValueFactory(new PropertyValueFactory<>("nombreCliente"));
+        colNombreUsuario.setCellValueFactory(new PropertyValueFactory<>("nombreEmpleado"));
+        colNombreTransaccion.setCellValueFactory(new PropertyValueFactory<>("tipoTransaccion"));
+        colNombreProducto.setCellValueFactory(new PropertyValueFactory<>("nombreProducto"));
+        colCantidadProducto.setCellValueFactory(new PropertyValueFactory<>("cantidadProducto"));
+        colTotalVenta.setCellValueFactory(new PropertyValueFactory<>("totalVenta"));
+
+        tbl_datos_ventas.setItems(ventaData);
+
+        tbl_datos_ventas.setOnMouseClicked(event -> {
+            DatosVentas VentaSeleccionada = tbl_datos_ventas.getSelectionModel().getSelectedItem();
+            if (VentaSeleccionada != null) {
+                // Establece los datos de la fila seleccionada en los campos de texto
+                // Establece los datos de la fila seleccionada en los campos de texto
+
+                // Selecciona el cliente en el ComboBox
+                String nombreCliente = VentaSeleccionada.getNombreCliente();
+                cb_nombre_cliente.setValue(nombreCliente);
+
+                String nombreEmpleado = VentaSeleccionada.getNombreEmpleado();
+                cb_codigo_empleado.setValue(nombreEmpleado);
+
+                String codigoTransaccion = VentaSeleccionada.getNombreProducto();
+                cb_transacción_venta.setValue(codigoTransaccion);
+
+                String codigoProducto = VentaSeleccionada.getTipoTransaccion();
+                cb_producto_venta.setValue(codigoProducto);
+
+                txf_cantidad_venta.setText(String.valueOf(VentaSeleccionada.getCantidadProducto()));
+
+                VentaSeleccionada = tbl_datos_ventas.getSelectionModel().getSelectedItem();
+                this.ventaSeleccionada = VentaSeleccionada.getCodigoVenta();
+
+                // Habilita los campos y botones de actualización y eliminación
+                pnl_campos.setDisable(false);
+                btn_actualizar.setDisable(false);
+                btn_eliminar.setDisable(false);
+            }
+        });
+
+        // Carga los datos iniciales de los clientes
+        cargarDatosVentas();
     }
 
     @FXML
@@ -107,7 +281,39 @@ public class VentaController implements Initializable {
 
     @FXML
     void ClickBtnDelete(ActionEvent event) {
+        DatosVentas ventaSeleccionada = tbl_datos_ventas.getSelectionModel().getSelectedItem();
+        if (ventaSeleccionada != null) {
+            // Muestra un cuadro de diálogo de confirmación para eliminar
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirmación de eliminación");
+            alert.setHeaderText("¿Estás seguro de que deseas eliminar esta venta?");
+            alert.setContentText("Esta acción no se puede deshacer.");
 
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                // Si el usuario confirma la eliminación, procede a eliminar el registro
+                int codigoVenta = ventaSeleccionada.getCodigoVenta();
+                try {
+                    Connection connection = DatabaseUtil.getConnection();
+                    String deleteQuery = "DELETE FROM tablaVenta WHERE codigoVenta = ?";
+                    PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
+                    deleteStatement.setInt(1, codigoVenta);
+
+                    int rowsDeleted = deleteStatement.executeUpdate();
+
+                    if (rowsDeleted > 0) {
+                        mostrarMensajeExito("Eliminación exitosa", "Venta eliminada exitosamente.");
+                        cargarDatosVentas();
+                    } else {
+                        mostrarMensajeError("Error", "La eliminación de la venta falló.");
+                    }
+                } catch (SQLException e) {
+                    mostrarMensajeError("Error", "Error al eliminar la venta: " + e.getMessage());
+                }
+            }
+        } else {
+            mostrarMensajeError("Error", "Debes seleccionar una venta para eliminar.");
+        }
     }
 
     @FXML
@@ -116,8 +322,51 @@ public class VentaController implements Initializable {
     }
 
     @FXML
-    void ClickBtnUpdate(ActionEvent event) {
+    void ClickBtnUpdate(ActionEvent event) throws SQLException {
+        Connection connection = null;
+        connection = DatabaseUtil.getConnection();
 
+        // Obtener los datos necesarios para una venta
+        String selectedCliente = cb_nombre_cliente.getValue(); // Obtener el cliente seleccionado
+        int codigoCliente = obtenerCodigoCliente(selectedCliente);
+        String selectedUsuario = cb_codigo_empleado.getValue(); // Obtener el usuario seleccionado
+        int codigoUsuario = obtenerCodigoUsuario(selectedUsuario);
+        String selectedTransaccion = cb_transacción_venta.getValue(); // Obtener la transacción seleccionada
+        int codigoTransaccion = obtenerCodigoTransaccion(selectedTransaccion);
+        String selectedProducto = cb_producto_venta.getValue(); // Obtener el producto seleccionado
+        int codigoProducto = obtenerCodigoProducto(selectedProducto);
+        int cantidadProducto = Integer.parseInt(txf_cantidad_venta.getText()); // Obtener la cantidad de producto
+        BigDecimal precioProducto = obtenerPrecioProducto(selectedProducto); // Obtener el precio del producto
+        BigDecimal totalVenta = precioProducto.multiply(BigDecimal.valueOf(cantidadProducto)); // Calcular el total de la venta
+
+        if (selectedCliente.isEmpty() || selectedUsuario.isEmpty() || selectedTransaccion.isEmpty()
+                || selectedProducto.isEmpty() || txf_cantidad_venta.getText().isEmpty()) {
+            mostrarMensajeError("Error", "Debe llenar todos los campos.");
+        } else {
+            // Consulta SQL para actualizar una venta existente
+            String updateVentaQuery = "UPDATE tablaVenta SET codigoCliente = ?, codigoUsuario = ?, codigoTransaccion = ?, codigoProducto = ?, cantidadProducto = ?, totalVenta = ? WHERE codigoVenta = ?";
+
+            // Asumiendo que tienes un campo "codigoVenta" para identificar la venta a actualizar
+            int codigoVenta = ventaSeleccionada; // Debes implementar esta función para obtener el código de la venta a actualizar
+
+            PreparedStatement updateVentaStatement = connection.prepareStatement(updateVentaQuery);
+            updateVentaStatement.setInt(1, codigoCliente);
+            updateVentaStatement.setInt(2, codigoUsuario);
+            updateVentaStatement.setInt(3, codigoTransaccion);
+            updateVentaStatement.setInt(4, codigoProducto);
+            updateVentaStatement.setInt(5, cantidadProducto);
+            updateVentaStatement.setBigDecimal(6, totalVenta);
+            updateVentaStatement.setInt(7, codigoVenta); // Utiliza el código de la venta a actualizar
+
+            int rowsUpdated = updateVentaStatement.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                mostrarMensajeExito("Actualización exitosa", "Venta actualizada exitosamente.");
+                cargarDatosVentas();
+            } else {
+                mostrarMensajeError("Error", "La actualización de la venta falló.");
+            }
+        }
     }
 
     @FXML
@@ -139,8 +388,138 @@ public class VentaController implements Initializable {
     }
 
     @FXML
-    void clickAgregar(ActionEvent event) {
+    void clickAgregar(ActionEvent event) throws SQLException {
+        Connection connection = null;
+        connection = DatabaseUtil.getConnection();
 
+        // Obtener los datos necesarios para una venta
+        String selectedCliente = cb_nombre_cliente.getValue(); // Obtener el cliente seleccionado
+        int codigoCliente = obtenerCodigoCliente(selectedCliente);
+        String selectedUsuario = cb_codigo_empleado.getValue(); // Obtener el usuario seleccionado
+        int codigoUsuario = obtenerCodigoUsuario(selectedUsuario);
+        String selectedTransaccion = cb_transacción_venta.getValue(); // Obtener la transacción seleccionada
+        int codigoTransaccion = obtenerCodigoTransaccion(selectedTransaccion);
+        String selectedProducto = cb_producto_venta.getValue(); // Obtener el producto seleccionado
+        int codigoProducto = obtenerCodigoProducto(selectedProducto);
+        int cantidadProducto = Integer.parseInt(txf_cantidad_venta.getText()); // Obtener la cantidad de producto
+        BigDecimal precioProducto = obtenerPrecioProducto(selectedProducto); // Obtener el precio del producto
+        BigDecimal totalVenta = precioProducto.multiply(BigDecimal.valueOf(cantidadProducto)); // Calcular el total de la venta
+
+        if (selectedCliente.isEmpty() || selectedUsuario.isEmpty() || selectedTransaccion.isEmpty()
+                || selectedProducto.isEmpty() || txf_cantidad_venta.getText().isEmpty()) {
+            mostrarMensajeError("Error", "Debe llenar todos los campos.");
+        } else {
+            // Consulta SQL para insertar una nueva venta
+            String insertVentaQuery = "INSERT INTO tablaVenta (fechaVenta, codigoCliente, codigoUsuario, codigoTransaccion, codigoProducto, cantidadProducto, totalVenta) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement insertVentaStatement = connection.prepareStatement(insertVentaQuery);
+            insertVentaStatement.setDate(1, java.sql.Date.valueOf(LocalDate.now())); // Fecha actual
+            insertVentaStatement.setInt(2, codigoCliente);
+            insertVentaStatement.setInt(3, codigoUsuario);
+            insertVentaStatement.setInt(4, codigoTransaccion);
+            insertVentaStatement.setInt(5, codigoProducto);
+            insertVentaStatement.setInt(6, cantidadProducto);
+            insertVentaStatement.setBigDecimal(7, totalVenta);
+            insertVentaStatement.executeUpdate();
+
+            mostrarMensajeExito("Registro exitoso", "Venta registrada exitosamente.");
+
+            // Realiza aquí cualquier otra acción que necesites después de registrar la venta.
+            cargarDatosVentas();
+        }
+    }
+
+    private int obtenerCodigoCliente(String nombreCliente) throws SQLException {
+        Connection connection = null;
+        connection = DatabaseUtil.getConnection();
+
+        // Consulta SQL para obtener el código del cliente
+        String clienteQuery = "SELECT codigoCliente FROM tablaCliente WHERE nombreCliente = ?";
+        PreparedStatement clienteStatement = connection.prepareStatement(clienteQuery);
+        clienteStatement.setString(1, nombreCliente);
+        ResultSet clienteResultSet = clienteStatement.executeQuery();
+
+        int codigoCliente = -1; // Valor por defecto en caso de que no se encuentre el cliente
+
+        if (clienteResultSet.next()) {
+            codigoCliente = clienteResultSet.getInt("codigoCliente");
+        }
+
+        return codigoCliente;
+    }
+
+    private int obtenerCodigoUsuario(String nombreUsuario) throws SQLException {
+        Connection connection = null;
+        connection = DatabaseUtil.getConnection();
+
+        // Consulta SQL para obtener el código del usuario
+        String usuarioQuery = "SELECT codigoUsuario FROM tablaUsuario WHERE primerNombre = ?";
+        PreparedStatement usuarioStatement = connection.prepareStatement(usuarioQuery);
+        usuarioStatement.setString(1, nombreUsuario);
+        ResultSet usuarioResultSet = usuarioStatement.executeQuery();
+
+        int codigoUsuario = -1; // Valor por defecto en caso de que no se encuentre el usuario
+
+        if (usuarioResultSet.next()) {
+            codigoUsuario = usuarioResultSet.getInt("codigoUsuario");
+        }
+        return codigoUsuario;
+    }
+
+    private int obtenerCodigoTransaccion(String nombreTransaccion) throws SQLException {
+        Connection connection = null;
+        connection = DatabaseUtil.getConnection();
+
+        // Consulta SQL para obtener el código del tipo de transacción
+        String transaccionQuery = "SELECT codigoTransaccion FROM tablaTransaccion WHERE tipoTransaccion = ?";
+        PreparedStatement transaccionStatement = connection.prepareStatement(transaccionQuery);
+        transaccionStatement.setString(1, nombreTransaccion);
+        ResultSet transaccionResultSet = transaccionStatement.executeQuery();
+
+        int codigoTransaccion = -1; // Valor por defecto en caso de que no se encuentre la transacción
+
+        if (transaccionResultSet.next()) {
+            codigoTransaccion = transaccionResultSet.getInt("codigoTransaccion");
+        }
+
+        return codigoTransaccion;
+    }
+
+    private int obtenerCodigoProducto(String nombreProducto) throws SQLException {
+        Connection connection = null;
+        connection = DatabaseUtil.getConnection();
+
+        // Consulta SQL para obtener el código del producto
+        String productoQuery = "SELECT codigoProducto FROM tablaProducto WHERE nombreProducto = ?";
+        PreparedStatement productoStatement = connection.prepareStatement(productoQuery);
+        productoStatement.setString(1, nombreProducto);
+        ResultSet productoResultSet = productoStatement.executeQuery();
+
+        int codigoProducto = -1; // Valor por defecto en caso de que no se encuentre el producto
+
+        if (productoResultSet.next()) {
+            codigoProducto = productoResultSet.getInt("codigoProducto");
+        }
+
+        return codigoProducto;
+    }
+
+    private BigDecimal obtenerPrecioProducto(String nombreProducto) throws SQLException {
+        Connection connection = null;
+        connection = DatabaseUtil.getConnection();
+
+        // Consulta SQL para obtener el precio del producto
+        String precioProductoQuery = "SELECT precio FROM tablaProducto WHERE nombreProducto = ?";
+        PreparedStatement precioProductoStatement = connection.prepareStatement(precioProductoQuery);
+        precioProductoStatement.setString(1, nombreProducto);
+        ResultSet precioProductoResultSet = precioProductoStatement.executeQuery();
+
+        BigDecimal precioProducto = BigDecimal.ZERO; // Valor por defecto en caso de que no se encuentre el producto
+
+        if (precioProductoResultSet.next()) {
+            precioProducto = precioProductoResultSet.getBigDecimal("precio");
+        }
+
+        return precioProducto;
     }
 
     @FXML
@@ -182,5 +561,44 @@ public class VentaController implements Initializable {
         boton.setOnMouseExited(event -> {
             boton.setStyle("-fx-background-color: transparent;");
         });
+    }
+
+    private void cargarDatosVentas() {
+        ventaData.clear(); // Limpia los datos existentes
+
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            Statement statement = connection.createStatement();
+
+            String query = "SELECT v.codigoVenta, v.fechaVenta, c.nombreCliente, u.primerNombre, t.tipoTransaccion, p.nombreProducto, v.cantidadProducto, v.totalVenta " +
+                    "FROM tablaVenta v " +
+                    "INNER JOIN tablaCliente c ON v.codigoCliente = c.codigoCliente " +
+                    "INNER JOIN tablaUsuario u ON v.codigoUsuario = u.codigoUsuario " +
+                    "INNER JOIN tablaTransaccion t ON v.codigoTransaccion = t.codigoTransaccion " +
+                    "INNER JOIN tablaProducto p ON v.codigoProducto = p.codigoProducto";
+
+            ResultSet resultSet = statement.executeQuery(query);
+
+            while (resultSet.next()) {
+                int codigoVenta = resultSet.getInt("codigoVenta");
+                Date fechaVenta = resultSet.getDate("fechaVenta");
+                String nombreCliente = resultSet.getString("nombreCliente");
+                String nombreUsuario = resultSet.getString("primerNombre");
+                String nombreTransaccion = resultSet.getString("tipoTransaccion");
+                String nombreProducto = resultSet.getString("nombreProducto");
+                int cantidadProducto = resultSet.getInt("cantidadProducto");
+                BigDecimal totalVenta = resultSet.getBigDecimal("totalVenta");
+
+                DatosVentas venta = new DatosVentas(codigoVenta, fechaVenta, nombreCliente, nombreUsuario, nombreProducto, nombreTransaccion, cantidadProducto, totalVenta);
+                ventaData.add(venta);
+            }
+
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarMensajeError("Error en la base de datos", "No se pudieron cargar los datos desde la base de datos.");
+        }
     }
 }

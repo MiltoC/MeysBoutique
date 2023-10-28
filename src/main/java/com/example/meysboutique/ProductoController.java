@@ -471,10 +471,16 @@ public class ProductoController implements Initializable {
                 proveedores.add(resultSet.getString("nombreProveedor"));
             }
 
-            cb_codigo_producto_proveedor.setItems(proveedores);
-
-            // Establece la opción por defecto
-            cb_codigo_producto_proveedor.setValue(proveedores.get(0));
+            // Verifica si la lista de proveedores está vacía
+            if (!proveedores.isEmpty()) {
+                // Si hay datos en la lista, establece la opción por defecto
+                cb_codigo_producto_proveedor.setItems(proveedores);
+                cb_codigo_producto_proveedor.setValue(proveedores.get(0));
+            } else {
+                // Si la lista está vacía, muestra un valor por defecto
+                cb_codigo_producto_proveedor.setItems(FXCollections.observableArrayList("No hay registros"));
+                cb_codigo_producto_proveedor.setValue("No hay registros");
+            }
 
             resultSet.close();
             statement.close();

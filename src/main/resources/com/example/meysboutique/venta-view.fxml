@@ -8,6 +8,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -158,7 +159,13 @@
                         <ComboBox fx:id="cb_codigo_empleado" layoutX="110.0" layoutY="81.0" prefHeight="38.0" prefWidth="331.0" />
                         <ComboBox fx:id="cb_transacción_venta" layoutX="111.0" layoutY="129.0" prefHeight="38.0" prefWidth="331.0" />
                   <ComboBox fx:id="cb_nombre_cliente" layoutX="111.0" layoutY="32.0" prefHeight="37.0" prefWidth="331.0" />
-                  <ComboBox fx:id="cb_producto_venta" layoutX="111.0" layoutY="178.0" prefHeight="38.0" prefWidth="331.0" />
+                  <ComboBox fx:id="cb_producto_venta" layoutX="111.0" layoutY="178.0" prefHeight="38.0" prefWidth="120.0" />
+                  <Label layoutX="245.0" layoutY="185.0" text="Cantidad">
+                     <font>
+                        <Font name="System Italic" size="16.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="txf_cantidad_venta" layoutX="322.0" layoutY="179.0" prefHeight="37.0" prefWidth="120.0" />
                     </children></Pane>
                 <Pane fx:id="pnl_botones" layoutY="225.0" prefHeight="67.0" prefWidth="370.0">
                     <children>
@@ -176,15 +183,16 @@
             </Pane>
             </children>
         </Pane>
-        <TableView fx:id="tbl_datos_productos" layoutX="295.0" layoutY="491.0" prefHeight="224.0" prefWidth="874.0" style="-fx-border-radius: 0 0 10 10; -fx-background-radius: 0 0 10 10;">
+        <TableView fx:id="tbl_datos_ventas" layoutX="295.0" layoutY="491.0" prefHeight="224.0" prefWidth="874.0" style="-fx-border-radius: 0 0 10 10; -fx-background-radius: 0 0 10 10;">
             <columns>
-                <TableColumn fx:id="colCodigo_producto" prefWidth="75.0" style="-fx-alignment: CENTER;" text="Codigo" />
-                <TableColumn fx:id="col_cliente_venta" prefWidth="75.0" style="-fx-alignment: center;" text="Cliente" />
-                <TableColumn fx:id="col_empleado_venta" prefWidth="75.0" style="-fx-alignment: center;" text="Empleado" />
-                <TableColumn fx:id="col_transaccion_venta" prefWidth="75.0" style="-fx-alignment: center;" text="Transacción" />
-                <TableColumn fx:id="col_producto_venta" prefWidth="75.0" text="Producto" />
-                <TableColumn fx:id="col_total_venta" prefWidth="75.0" text="Total" />
-            <TableColumn fx:id="col_fecha_venta" prefWidth="75.0" text="Fecha" />
+                <TableColumn fx:id="colCodigoVenta" prefWidth="75.0" sortType="DESCENDING" style="-fx-alignment: CENTER;" text="Codigo" />
+                <TableColumn fx:id="colNombreCliente" prefWidth="75.0" style="-fx-alignment: center;" text="Cliente" />
+                <TableColumn fx:id="colNombreUsuario" prefWidth="75.0" style="-fx-alignment: center;" text="Empleado" />
+                <TableColumn fx:id="colNombreTransaccion" prefWidth="75.0" style="-fx-alignment: center;" text="Producto" />
+                <TableColumn fx:id="colNombreProducto" prefWidth="75.0" style="-fx-alignment: center;" text="Transacción" />
+                <TableColumn fx:id="colCantidadProducto" prefWidth="75.0" style="-fx-alignment: center;" text="Cantidad" />
+            <TableColumn fx:id="colFechaVenta" prefWidth="75.0" style="-fx-alignment: center;" text="Fecha" />
+            <TableColumn fx:id="colTotalVenta" prefWidth="75.0" style="-fx-alignment: center;" text="Total" />
             </columns>
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
