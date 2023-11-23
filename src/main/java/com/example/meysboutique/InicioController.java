@@ -13,16 +13,17 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 public class InicioController implements Initializable {
     public InicioController() {
     }
     @FXML
-    private Button btnBoutiques;
-
-    @FXML
-    private Button btnCargos;
+    private Button btnCompras;
 
     @FXML
     private Button btnCerrar;
@@ -44,9 +45,8 @@ public class InicioController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        asignarEventosHover(btnBoutiques);
+        asignarEventosHover(btnCompras);
         asignarEventosHover(hola);
-        asignarEventosHover(btnCargos);
         asignarEventosHover(btnCerrar);
         asignarEventosHover(btnProveedores);
         asignarEventosHover(btnClientes);
@@ -70,14 +70,35 @@ public class InicioController implements Initializable {
     }
 
     @FXML
-    void cerrarSesion(ActionEvent event) throws IOException {
+    void comprasOpen(ActionEvent event) throws IOException {
         Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         currentStage.close();
 
-        //muestra mensaje de registro exitoso
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("compra-view.fxml"));
+        Scene scene = new Scene(loader.load());
+        Stage stage = new Stage();
+        stage.setTitle("Compras-Mey's Boutique");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    @FXML
+    void cerrarSesion(ActionEvent event) throws IOException {
+        // Obtener el código de usuario del usuario actualmente logueado
+        int codigoUsuario = obtenerCodigoUsuarioActual();
+
+        // Eliminar el registro de la tablaSesionUsuario asociado al usuario actual
+        eliminarSesionUsuario(codigoUsuario);
+
+        // Cerrar la ventana actual
+        Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        currentStage.close();
+
+        // Mostrar mensaje de cerrar sesión exitoso
         mostrarMensajeExito("Cerrar sesión", "Sesión cerrada exitosamente.");
 
-        //redirecciona a la ventana de login
+        // Redireccionar a la ventana de login
         FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
         Scene scene = new Scene(loader.load());
         Stage stage = new Stage();
@@ -85,6 +106,44 @@ public class InicioController implements Initializable {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
+
+    private int obtenerCodigoUsuarioActual() {
+        // Realizar una consulta SQL para obtener el código de usuario
+        int codigoUsuario = -1;  // Valor por defecto si no se puede obtener el código
+
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            if (connection != null) {
+                String selectQuery = "SELECT codigoUsuario FROM tablaSesionUsuario LIMIT 1";
+                PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
+                ResultSet resultSet = selectStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    codigoUsuario = resultSet.getInt("codigoUsuario");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            mostrarMensajeError("Error de SQL", "Ocurrió un error al ejecutar la consulta SQL: " + ex.getMessage());
+        }
+
+        return codigoUsuario;
+    }
+
+    private void eliminarSesionUsuario(int codigoUsuario) {
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            if (connection != null) {
+                String deleteQuery = "DELETE FROM tablaSesionUsuario WHERE codigoUsuario = ?";
+                PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
+                deleteStatement.setInt(1, codigoUsuario);
+                deleteStatement.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            mostrarMensajeError("Error de SQL", "Ocurrió un error al ejecutar la consulta SQL: " + ex.getMessage());
+        }
     }
 
     @FXML
@@ -127,6 +186,14 @@ public class InicioController implements Initializable {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
+
+    private void mostrarMensajeError(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 
     @FXML

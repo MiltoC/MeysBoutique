@@ -13,10 +13,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
 
@@ -92,13 +89,20 @@ public class UsuariosController implements Initializable{
 
     @FXML
     void cerrarSesion(ActionEvent event) throws IOException {
+        // Obtener el código de usuario del usuario actualmente logueado
+        int codigoUsuario = obtenerCodigoUsuarioActual();
+
+        // Eliminar el registro de la tablaSesionUsuario asociado al usuario actual
+        eliminarSesionUsuario(codigoUsuario);
+
+        // Cerrar la ventana actual
         Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         currentStage.close();
 
-        //muestra mensaje de registro exitoso
+        // Mostrar mensaje de cerrar sesión exitoso
         mostrarMensajeExito("Cerrar sesión", "Sesión cerrada exitosamente.");
 
-        //redirecciona a la ventana de login
+        // Redireccionar a la ventana de login
         FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
         Scene scene = new Scene(loader.load());
         Stage stage = new Stage();
@@ -106,6 +110,44 @@ public class UsuariosController implements Initializable{
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
+
+    private int obtenerCodigoUsuarioActual() {
+        // Realizar una consulta SQL para obtener el código de usuario
+        int codigoUsuario = -1;  // Valor por defecto si no se puede obtener el código
+
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            if (connection != null) {
+                String selectQuery = "SELECT codigoUsuario FROM tablaSesionUsuario LIMIT 1";
+                PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
+                ResultSet resultSet = selectStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    codigoUsuario = resultSet.getInt("codigoUsuario");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            mostrarMensajeError("Error de SQL", "Ocurrió un error al ejecutar la consulta SQL: " + ex.getMessage());
+        }
+
+        return codigoUsuario;
+    }
+
+    private void eliminarSesionUsuario(int codigoUsuario) {
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            if (connection != null) {
+                String deleteQuery = "DELETE FROM tablaSesionUsuario WHERE codigoUsuario = ?";
+                PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
+                deleteStatement.setInt(1, codigoUsuario);
+                deleteStatement.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            mostrarMensajeError("Error de SQL", "Ocurrió un error al ejecutar la consulta SQL: " + ex.getMessage());
+        }
     }
 
     private void mostrarMensajeExito(String titulo, String mensaje) {
@@ -134,7 +176,25 @@ public class UsuariosController implements Initializable{
     }
 
 
+    @FXML
+    void comprasOpen(ActionEvent event) throws IOException {
+        Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        currentStage.close();
 
+        //redirecciona a la ventana de login
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("compra-view.fxml"));
+        Scene scene = new Scene(loader.load());
+        Stage stage = new Stage();
+        stage.setTitle("Compras-Mey's Boutique");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    @FXML
+    void usuariosOpen(ActionEvent event) {
+
+    }
 
     private void cargarDatosUsuarios() {
         usuarioData.clear();

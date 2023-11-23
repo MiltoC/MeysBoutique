@@ -59,6 +59,12 @@ public class LoginController implements Initializable {
 
             if (resultSet.next()) {
                 // Las credenciales son correctas, permite el acceso al sistema
+
+                int codigoUsuario = resultSet.getInt("codigoUsuario");
+
+                // Inserta la sesión en la tabla de sesiones
+                insertarSesionUsuario(codigoUsuario);
+
                 Stage currentStage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
                 currentStage.close();
 
@@ -114,5 +120,19 @@ public class LoginController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    // Método para insertar la sesión del usuario en la tabla de sesiones
+    private void insertarSesionUsuario(int codigoUsuario) {
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            String insertQuery = "INSERT INTO tablaSesionUsuario (codigoUsuario, fechaInicio) VALUES (?, NOW())";
+            PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
+            insertStatement.setInt(1, codigoUsuario);
+            insertStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mostrarMensajeError("Error en la base de datos", "No se pudo insertar la sesión del usuario.");
+        }
     }
 }

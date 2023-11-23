@@ -10,6 +10,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class HelloController {
@@ -38,7 +40,13 @@ public class HelloController {
         task.setOnSucceeded(event -> {
             try {
                 conectarDB();
-                openLoginWindow();
+                if (usuarioEstaLogueado()) {
+                    // Si el usuario está logueado, abre directamente el InicioController
+                    openInicioWindow();
+                } else {
+                    // Si el usuario no está logueado, abre la ventana de login
+                    openLoginWindow();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -52,6 +60,19 @@ public class HelloController {
         currentStage.close();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
+        Scene scene = new Scene(loader.load());
+        Stage stage = new Stage();
+        stage.setTitle("Inicio's Boutique");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    private void openInicioWindow() throws IOException {
+        Stage currentStage = (Stage) ProgressIndicator.getScene().getWindow();
+        currentStage.close();
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("inicio-view.fxml"));
         Scene scene = new Scene(loader.load());
         Stage stage = new Stage();
         stage.setTitle("Inicio's Boutique");
@@ -74,6 +95,25 @@ public class HelloController {
             ex.printStackTrace();
             mostrarAlerta("Error de SQL", "Ocurrió un error al ejecutar la consulta SQL: " + ex.getMessage());
         }
+    }
+
+    private boolean usuarioEstaLogueado() {
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            if (connection != null) {
+                String sql = "SELECT COUNT(*) AS count FROM tablaSesionUsuario";
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if (resultSet.next()) {
+                    int count = resultSet.getInt("count");
+                    return count > 0;
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            mostrarAlerta("Error de SQL", "Ocurrió un error al ejecutar la consulta SQL: " + ex.getMessage());
+        }
+        return false;
     }
 
     private void mostrarAlerta(String titulo, String mensaje) {

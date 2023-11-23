@@ -19,7 +19,7 @@
     <children>
         <Pane layoutY="118.0" prefHeight="634.0" prefWidth="254.0" style="-fx-background-color: #232946; -fx-background-radius: 0 10 0 0;" AnchorPane.bottomAnchor="0.0">
             <children>
-                <Button fx:id="btnUsuarios" alignment="BASELINE_LEFT" layoutY="14.0" mnemonicParsing="false" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Usuarios" textFill="WHITE">
+                <Button fx:id="btnUsuarios" alignment="BASELINE_LEFT" layoutY="14.0" mnemonicParsing="false" onAction="#usuariosOpen" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Usuarios" textFill="WHITE">
                     <padding>
                         <Insets left="100.0" />
                     </padding>
@@ -32,7 +32,7 @@
                         <Image url="@img/administrador.png" />
                     </image>
                 </ImageView>
-                <Button fx:id="btnBoutiques" alignment="BASELINE_LEFT" layoutY="81.0" mnemonicParsing="false" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Boutiques" textFill="WHITE">
+                <Button fx:id="btnBoutiques" alignment="BASELINE_LEFT" layoutY="81.0" mnemonicParsing="false" onAction="#comprasOpen" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Compras" textFill="WHITE">
                     <padding>
                         <Insets left="100.0" />
                     </padding>
@@ -42,10 +42,10 @@
                 </Button>
                 <ImageView fitHeight="56.0" fitWidth="37.0" layoutX="45.0" layoutY="96.0" pickOnBounds="true" preserveRatio="true">
                     <image>
-                        <Image url="@img/compras.png" />
+                        <Image url="@img/bolsas-de-papel.png" />
                     </image>
                 </ImageView>
-                <Button fx:id="btnCargos" alignment="BASELINE_LEFT" layoutY="148.0" mnemonicParsing="false" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Cargos" textFill="WHITE">
+                <Button fx:id="btnMenu" alignment="BASELINE_LEFT" layoutY="148.0" mnemonicParsing="false" onAction="#menuInicioOpen" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Menú" textFill="WHITE">
                     <padding>
                         <Insets left="100.0" />
                     </padding>
@@ -55,23 +55,10 @@
                 </Button>
                 <ImageView fitHeight="56.0" fitWidth="37.0" layoutX="45.0" layoutY="163.0" pickOnBounds="true" preserveRatio="true">
                     <image>
-                        <Image url="@img/carrera-profesional.png" />
-                    </image>
-                </ImageView>
-                <Button fx:id="btnMenu" alignment="BASELINE_LEFT" layoutY="215.0" mnemonicParsing="false" onAction="#menuInicioOpen" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Menú" textFill="WHITE">
-                    <padding>
-                        <Insets left="100.0" />
-                    </padding>
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                </Button>
-                <ImageView fitHeight="56.0" fitWidth="37.0" layoutX="45.0" layoutY="230.0" pickOnBounds="true" preserveRatio="true">
-                    <image>
                         <Image url="@img/menu.png" />
                     </image>
                 </ImageView>
-                <Button fx:id="btnCerrar" alignment="BASELINE_LEFT" layoutY="284.0" mnemonicParsing="false" onAction="#cerrarSesion" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Cerrar sesión" textFill="WHITE">
+                <Button fx:id="btnCerrar" alignment="BASELINE_LEFT" layoutY="567.0" mnemonicParsing="false" onAction="#cerrarSesion" prefHeight="67.0" prefWidth="254.0" style="-fx-background-color: transparent; -fx-border-style: none; -fx-border-width: 0px;" text="Cerrar sesión" textFill="WHITE">
                     <padding>
                         <Insets left="100.0" />
                     </padding>
@@ -79,7 +66,7 @@
                         <Cursor fx:constant="HAND" />
                     </cursor>
                 </Button>
-                <ImageView fitHeight="56.0" fitWidth="37.0" layoutX="45.0" layoutY="299.0" pickOnBounds="true" preserveRatio="true">
+                <ImageView fitHeight="56.0" fitWidth="37.0" layoutX="45.0" layoutY="582.0" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="@img/cerrar-sesion.png" />
                     </image>
@@ -167,7 +154,7 @@
                   </Label>
                   <ComboBox fx:id="direccionCliente" layoutX="113.0" layoutY="160.0" prefHeight="37.0" prefWidth="328.0" />
                     </children></Pane>
-                <Pane fx:id="pnl_botones" layoutY="225.0" prefHeight="67.0" prefWidth="370.0">
+                <Pane fx:id="pnl_botones" layoutY="225.0" prefHeight="67.0" prefWidth="349.0">
                     <children>
                         <Button fx:id="btn_actualizar" disable="true" layoutX="14.0" layoutY="15.0" mnemonicParsing="false" onAction="#ClickBtnUpdate" prefHeight="37.0" prefWidth="101.0" style="-fx-background-color: #82B1FF; -fx-background-radius: 20; -fx-border-radius: 20;" text="Actualizar" />
                         <Button fx:id="btn_eliminar" disable="true" layoutX="127.0" layoutY="15.0" mnemonicParsing="false" onAction="#ClickBtnDelete" prefHeight="37.0" prefWidth="101.0" style="-fx-background-color: #FF8A80; -fx-background-radius: 20; -fx-border-radius: 20;" text="Eliminar" />
@@ -181,6 +168,7 @@
                         <Button layoutX="213.0" layoutY="10.0" mnemonicParsing="false" onAction="#ClickBtnCancelar" prefHeight="37.0" prefWidth="101.0" style="-fx-background-color: #EEEEEE; -fx-background-radius: 20; -fx-border-radius: 20;" text="Cancelar" />
                </children>
             </Pane>
+            <Button layoutX="357.0" layoutY="240.0" mnemonicParsing="false" onAction="#ClickBtnPDF" prefHeight="37.0" prefWidth="101.0" style="-fx-background-color: FFD180; -fx-background-radius: 20; -fx-border-radius: 20;" text="Reporte pdf" />
             </children>
         </Pane>
         <TableView fx:id="tbl_datos_clientes" layoutX="295.0" layoutY="491.0" prefHeight="224.0" prefWidth="874.0" style="-fx-border-radius: 0 0 10 10; -fx-background-radius: 0 0 10 10;">

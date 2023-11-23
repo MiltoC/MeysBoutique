@@ -92,6 +92,9 @@ public class VentaController implements Initializable {
     private Pane pnl_botones;
 
     @FXML
+    private Pane panel_agregar;
+
+    @FXML
     private Pane pnl_campos;
 
     @FXML
@@ -108,7 +111,6 @@ public class VentaController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         asignarEventosHover(btnBoutiques);
         asignarEventosHover(btnUsuarios);
-        asignarEventosHover(btnCargos);
         asignarEventosHover(btnCerrar);
         asignarEventosHover(btnMenu);
         asignarEventosHover(btnClientes);
@@ -270,13 +272,40 @@ public class VentaController implements Initializable {
             }
         });
 
+        txf_cantidad_venta.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("[1-9.]*")) {
+                txf_cantidad_venta.setText(newValue.replaceAll("[^1-9.]", ""));
+            }
+            if (newValue.length() > 9) {
+                txf_cantidad_venta.setText(newValue.substring(0, 9));
+            }
+        });
+
         // Carga los datos iniciales de los clientes
         cargarDatosVentas();
     }
 
     @FXML
-    void ClickBtnCancelar(ActionEvent event) {
+    void usuariosOpen(ActionEvent event) throws IOException {
+        Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        currentStage.close();
 
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("usuarios-view.fxml"));
+        Scene scene = new Scene(loader.load());
+        Stage stage = new Stage();
+        stage.setTitle("Usuarios-Mey's Boutique");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    @FXML
+    void ClickBtnCancelar(ActionEvent event) {
+        Limpiar();
+
+        tbl_datos_ventas.setDisable(false);
+        pnl_campos.setDisable(true);
+        panel_agregar.setDisable(true);
     }
 
     @FXML
@@ -304,6 +333,12 @@ public class VentaController implements Initializable {
                     if (rowsDeleted > 0) {
                         mostrarMensajeExito("Eliminación exitosa", "Venta eliminada exitosamente.");
                         cargarDatosVentas();
+
+                        tbl_datos_ventas.getSelectionModel().clearSelection();
+                        Limpiar();
+                        btn_eliminar.setDisable(true);
+                        btn_actualizar.setDisable(true);
+                        pnl_campos.setDisable(true);
                     } else {
                         mostrarMensajeError("Error", "La eliminación de la venta falló.");
                     }
@@ -318,7 +353,28 @@ public class VentaController implements Initializable {
 
     @FXML
     void ClickBtnNew(ActionEvent event) {
+        btn_eliminar.setDisable(true);
+        btn_actualizar.setDisable(true);
+        tbl_datos_ventas.getSelectionModel().clearSelection();//para que se deseleccione el siguiente elemento de la tabla
+        tbl_datos_ventas.setDisable(true);
+        panel_agregar.setDisable(false);
+        pnl_campos.setDisable(false);
+        Limpiar();
+    }
 
+    @FXML
+    void comprasOpen(ActionEvent event) throws IOException {
+        Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        currentStage.close();
+
+        //redirecciona a la ventana de login
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("compra-view.fxml"));
+        Scene scene = new Scene(loader.load());
+        Stage stage = new Stage();
+        stage.setTitle("Compras-Mey's Boutique");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
     }
 
     @FXML
@@ -363,6 +419,12 @@ public class VentaController implements Initializable {
             if (rowsUpdated > 0) {
                 mostrarMensajeExito("Actualización exitosa", "Venta actualizada exitosamente.");
                 cargarDatosVentas();
+
+                tbl_datos_ventas.getSelectionModel().clearSelection();
+                Limpiar();
+                btn_actualizar.setDisable(true);
+                pnl_campos.setDisable(true);
+                btn_eliminar.setDisable(true);
             } else {
                 mostrarMensajeError("Error", "La actualización de la venta falló.");
             }
@@ -371,13 +433,20 @@ public class VentaController implements Initializable {
 
     @FXML
     void cerrarSesion(ActionEvent event) throws IOException {
+        // Obtener el código de usuario del usuario actualmente logueado
+        int codigoUsuario = obtenerCodigoUsuarioActual();
+
+        // Eliminar el registro de la tablaSesionUsuario asociado al usuario actual
+        eliminarSesionUsuario(codigoUsuario);
+
+        // Cerrar la ventana actual
         Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         currentStage.close();
 
-        //muestra mensaje de registro exitoso
-        mostrarMensajeExito("Cerrar sesión", "Sesión cerrada .");
+        // Mostrar mensaje de cerrar sesión exitoso
+        mostrarMensajeExito("Cerrar sesión", "Sesión cerrada exitosamente.");
 
-        //redirecciona a la ventana de login
+        // Redireccionar a la ventana de login
         FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
         Scene scene = new Scene(loader.load());
         Stage stage = new Stage();
@@ -385,6 +454,44 @@ public class VentaController implements Initializable {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
+
+    private int obtenerCodigoUsuarioActual() {
+        // Realizar una consulta SQL para obtener el código de usuario
+        int codigoUsuario = -1;  // Valor por defecto si no se puede obtener el código
+
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            if (connection != null) {
+                String selectQuery = "SELECT codigoUsuario FROM tablaSesionUsuario LIMIT 1";
+                PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
+                ResultSet resultSet = selectStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    codigoUsuario = resultSet.getInt("codigoUsuario");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            mostrarMensajeError("Error de SQL", "Ocurrió un error al ejecutar la consulta SQL: " + ex.getMessage());
+        }
+
+        return codigoUsuario;
+    }
+
+    private void eliminarSesionUsuario(int codigoUsuario) {
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            if (connection != null) {
+                String deleteQuery = "DELETE FROM tablaSesionUsuario WHERE codigoUsuario = ?";
+                PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
+                deleteStatement.setInt(1, codigoUsuario);
+                deleteStatement.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            mostrarMensajeError("Error de SQL", "Ocurrió un error al ejecutar la consulta SQL: " + ex.getMessage());
+        }
     }
 
     @FXML
@@ -405,8 +512,11 @@ public class VentaController implements Initializable {
         BigDecimal precioProducto = obtenerPrecioProducto(selectedProducto); // Obtener el precio del producto
         BigDecimal totalVenta = precioProducto.multiply(BigDecimal.valueOf(cantidadProducto)); // Calcular el total de la venta
 
+        String cantidad = txf_cantidad_venta.getText();
+
+
         if (selectedCliente.isEmpty() || selectedUsuario.isEmpty() || selectedTransaccion.isEmpty()
-                || selectedProducto.isEmpty() || txf_cantidad_venta.getText().isEmpty()) {
+                || selectedProducto.isEmpty() || cantidad.isEmpty()) {
             mostrarMensajeError("Error", "Debe llenar todos los campos.");
         } else {
             // Consulta SQL para insertar una nueva venta
@@ -425,6 +535,12 @@ public class VentaController implements Initializable {
 
             // Realiza aquí cualquier otra acción que necesites después de registrar la venta.
             cargarDatosVentas();
+
+            panel_agregar.setDisable(true);
+            pnl_campos.setDisable(true);
+            tbl_datos_ventas.getSelectionModel().clearSelection();
+            tbl_datos_ventas.setDisable(false);
+            Limpiar();
         }
     }
 
@@ -601,4 +717,13 @@ public class VentaController implements Initializable {
             mostrarMensajeError("Error en la base de datos", "No se pudieron cargar los datos desde la base de datos.");
         }
     }
+
+    private void Limpiar() {
+        cb_nombre_cliente.setValue("");
+        cb_codigo_empleado.setValue("");
+        cb_transacción_venta.setValue("");
+        cb_producto_venta.setValue("");
+        txf_cantidad_venta.setText("");
+    }
+
 }

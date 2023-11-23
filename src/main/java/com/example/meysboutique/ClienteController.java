@@ -10,13 +10,24 @@ import javafx.scene.control.*;
 import javafx.fxml.Initializable;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
 import java.util.Optional;
 import java.util.ResourceBundle;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
+
 
 public class ClienteController implements Initializable {
 
@@ -113,6 +124,78 @@ public class ClienteController implements Initializable {
     }
 
     @FXML
+    void usuariosOpen(ActionEvent event) throws IOException {
+        Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        currentStage.close();
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("usuarios-view.fxml"));
+        Scene scene = new Scene(loader.load());
+        Stage stage = new Stage();
+        stage.setTitle("Usuarios-Mey's Boutique");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
+
+    @FXML
+    void ClickBtnPDF(ActionEvent event) {
+        try {
+            // Configuración para guardar el PDF en un archivo
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+            File file = fileChooser.showSaveDialog(null);
+
+            if (file != null) {
+                // Inicializar el documento PDF
+                PDDocument document = new PDDocument();
+                PDPage page = new PDPage(PDRectangle.A4);
+                document.addPage(page);
+
+                // Crear un nuevo contenido para la página
+                PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+                // Agregar contenido al PDF (puedes personalizar esto según tus necesidades)
+                contentStream.beginText();
+                contentStream.setFont(getFont(document), 12); // Utiliza la función getFont() para manejar la carga de la fuente
+                contentStream.newLineAtOffset(50, 700);
+                contentStream.showText("Reporte de Clientes");
+                contentStream.newLineAtOffset(0, -20);
+
+                // Obtener datos de la tabla y agregarlos al PDF
+                for (DatosClientes cliente : clienteData) {
+                    contentStream.showText("Nombre: " + cliente.getNombreCliente());
+                    contentStream.newLineAtOffset(0, -15);
+                    contentStream.showText("Apellido: " + cliente.getApellidoCliente());
+                    contentStream.newLineAtOffset(0, -15);
+                    contentStream.showText("DUI: " + cliente.getDuiCliente());
+                    contentStream.newLineAtOffset(0, -15);
+                    contentStream.showText("Teléfono: " + cliente.getTelefonoCliente());
+                    contentStream.newLineAtOffset(0, -15);
+                    contentStream.showText("Municipio: " + cliente.getNombreMunicipio());
+                    contentStream.newLineAtOffset(0, -20);
+                }
+
+                contentStream.endText();
+                contentStream.close();
+
+                // Guardar el documento en el archivo seleccionado
+                document.save(file);
+                document.close();
+
+                mostrarMensajeExito("Generación de PDF", "El reporte PDF se generó exitosamente.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarMensajeError("Error", "Error al generar el reporte PDF: " + e.getMessage());
+        }
+    }
+
+    private PDType0Font getFont(PDDocument document) throws IOException {
+        return PDType0Font.load(document, getClass().getResourceAsStream("/fonts/Roboto-Light.ttf"));
+        // Reemplaza "/path/to/your/fontfile.ttf" con la ruta correcta de tu archivo de fuente
+    }
+
+    @FXML
     void ClickBtnDelete(ActionEvent event) {
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -156,6 +239,21 @@ public class ClienteController implements Initializable {
             e.printStackTrace();
             mostrarMensajeError("Error", "Error al eliminar el cliente.");
         }
+    }
+
+    @FXML
+    void comprasOpen(ActionEvent event) throws IOException {
+        Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        currentStage.close();
+
+        //redirecciona a la ventana de login
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("compra-view.fxml"));
+        Scene scene = new Scene(loader.load());
+        Stage stage = new Stage();
+        stage.setTitle("Compras-Mey's Boutique");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
     }
 
     @FXML
@@ -259,7 +357,6 @@ public class ClienteController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         asignarEventosHover(btnBoutiques);
         asignarEventosHover(btnUsuarios);
-        asignarEventosHover(btnCargos);
         asignarEventosHover(btnCerrar);
         asignarEventosHover(btnMenu);
         asignarEventosHover(btnClientes);
@@ -373,13 +470,20 @@ public class ClienteController implements Initializable {
 
     @FXML
     void cerrarSesion(ActionEvent event) throws IOException {
+        // Obtener el código de usuario del usuario actualmente logueado
+        int codigoUsuario = obtenerCodigoUsuarioActual();
+
+        // Eliminar el registro de la tablaSesionUsuario asociado al usuario actual
+        eliminarSesionUsuario(codigoUsuario);
+
+        // Cerrar la ventana actual
         Stage currentStage = (Stage) ((Button) event.getSource()).getScene().getWindow();
         currentStage.close();
 
-        //muestra mensaje de registro exitoso
+        // Mostrar mensaje de cerrar sesión exitoso
         mostrarMensajeExito("Cerrar sesión", "Sesión cerrada exitosamente.");
 
-        //redirecciona a la ventana de login
+        // Redireccionar a la ventana de login
         FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
         Scene scene = new Scene(loader.load());
         Stage stage = new Stage();
@@ -387,6 +491,44 @@ public class ClienteController implements Initializable {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
+
+    private int obtenerCodigoUsuarioActual() {
+        // Realizar una consulta SQL para obtener el código de usuario
+        int codigoUsuario = -1;  // Valor por defecto si no se puede obtener el código
+
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            if (connection != null) {
+                String selectQuery = "SELECT codigoUsuario FROM tablaSesionUsuario LIMIT 1";
+                PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
+                ResultSet resultSet = selectStatement.executeQuery();
+
+                if (resultSet.next()) {
+                    codigoUsuario = resultSet.getInt("codigoUsuario");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            mostrarMensajeError("Error de SQL", "Ocurrió un error al ejecutar la consulta SQL: " + ex.getMessage());
+        }
+
+        return codigoUsuario;
+    }
+
+    private void eliminarSesionUsuario(int codigoUsuario) {
+        try {
+            Connection connection = DatabaseUtil.getConnection();
+            if (connection != null) {
+                String deleteQuery = "DELETE FROM tablaSesionUsuario WHERE codigoUsuario = ?";
+                PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
+                deleteStatement.setInt(1, codigoUsuario);
+                deleteStatement.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            mostrarMensajeError("Error de SQL", "Ocurrió un error al ejecutar la consulta SQL: " + ex.getMessage());
+        }
     }
 
     private void asignarEventosHover(Button boton) {
